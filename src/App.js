@@ -22,6 +22,9 @@ class App extends Component {
 
 }
 
+/**
+ * Base component for managing the app
+ */
 class CalendarManager extends React.Component {
 
   constructor(props) {
@@ -42,9 +45,15 @@ class CalendarManager extends React.Component {
   }
 
   handleClick(day, {currentSelected} ) {
+
+    // if days are confirmed, do not process additional clicks
+    if (this.state.daysConfirmed) { 
+      return;
+    }
     
     console.log("date clicked: " + day);
 
+    // check if the date exists in array of day items
     let existsIn = this.state.dayItems.findIndex( element => {
       return element.getTime() === day.getTime();
     });
@@ -78,9 +87,6 @@ class CalendarManager extends React.Component {
     }
 
     
-
-
-    
   }
 
   render() {
@@ -103,6 +109,10 @@ class CalendarManager extends React.Component {
     );
   }
 }
+
+/**
+ * individual components
+ */
 
 function DayList(props) {
   const dayList = props.dayList;
