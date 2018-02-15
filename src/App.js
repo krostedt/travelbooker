@@ -28,10 +28,17 @@ class CalendarManager extends React.Component {
     super(props);
     this.state = {
       activeDay: undefined,
-      dayItems: []
+      dayItems: [],
+      daysConfirmed: false
     };
 
     this.handleClick = this.handleClick.bind(this);
+    this.handleConfirm = this.handleConfirm.bind(this);
+
+  }
+
+  handleConfirm() {
+    this.setState({daysConfirmed: true});
   }
 
   handleClick(day, {currentSelected} ) {
@@ -91,6 +98,7 @@ class CalendarManager extends React.Component {
         <DayList 
           dayList={this.state.dayItems} 
         />
+        <ConfirmButton onConfirm={this.handleConfirm} confirmed={this.state.daysConfirmed} />
       </div>
     );
   }
@@ -116,6 +124,11 @@ const Title = () => {
 
 const DayItem = (props) => {
   return (<p>{props.date.toLocaleDateString()}</p>);
+};
+
+const ConfirmButton = (props) => {
+  console.log(props);
+  return (<button type="button" onClick={props.onConfirm}>{props.confirmed ? ("Confirmed") : ("Confirm")}</button>);
 };
 
 export default App;
