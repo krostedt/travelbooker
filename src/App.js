@@ -58,7 +58,12 @@ class CalendarManager extends React.Component {
   }
 
   handleConfirm() {
-    this.setState({daysConfirmed: true});
+    
+    if (this.state.dayItems.length <= 0) {
+      console.log("select at least one item");
+      return;
+    }
+    this.setState({daysConfirmed: !this.state.daysConfirmed});
   }
 
   handleClick(day, {currentSelected} ) {
