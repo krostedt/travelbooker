@@ -51,40 +51,31 @@ class CalendarManager extends React.Component {
       return;
     }
     
-    console.log("date clicked: " + day);
-
     // check if the date exists in array of day items
-    let existsIn = this.state.dayItems.findIndex( element => {
+    let inSelected = this.state.dayItems.findIndex( element => {
       return element.getTime() === day.getTime();
     });
     
     if (currentSelected) {
-
       this.setState({activeDay: undefined});
-
-      // skip testing if index is valid since item has been selected before
-      this.setState({  
-          dayItems: this.state.dayItems.filter( (item, itemIndex) => itemIndex !== existsIn )
-      });      
-
-      return;
     }
 
-    if (existsIn === -1) {
+    if (inSelected === -1) {
 
       this.setState({
         activeDay: day,
         dayItems: [...this.state.dayItems, day]
       });
 
-    } else {
+      return;
 
-      // skip testing if index is valid since item has been selected before
-      this.setState({  
-        dayItems: this.state.dayItems.filter( (item, itemIndex) => itemIndex !== existsIn )
-      });  
+    } 
 
-    }
+    this.setState({  
+      dayItems: this.state.dayItems.filter( (item, itemIndex) => itemIndex !== inSelected )
+    });  
+
+    
 
     
   }
@@ -137,7 +128,6 @@ const DayItem = (props) => {
 };
 
 const ConfirmButton = (props) => {
-  console.log(props);
   return (<button type="button" onClick={props.onConfirm}>{props.confirmed ? ("Confirmed") : ("Confirm")}</button>);
 };
 
