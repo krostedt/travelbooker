@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "firebase": "^4.10.0",
     "husky": "^0.14.3",
     "lint-staged": "^6.1.0",
     "moment": "^2.20.1",
