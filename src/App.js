@@ -6,8 +6,53 @@ import 'react-day-picker/lib/style.css';
 import MomentLocaleUtils from 'react-day-picker/moment';
 import 'moment/locale/fi';
 import classSet from 'react-classset';
+import firebase from 'firebase';
 
 class App extends Component {
+  constructor(props) {
+    super(props);
+    // Initialize Firebase
+
+    let config = {
+      apiKey: 'AIzaSyBul-6awofxDhfB_-xzojnLnaDv7dKFf7k',
+      authDomain: 'travelbkr.firebaseapp.com',
+      databaseURL: 'https://travelbkr.firebaseio.com',
+      projectId: 'travelbkr',
+      storageBucket: '',
+      messagingSenderId: '424597927994'
+    };
+    firebase.initializeApp(config);
+
+    firebase.auth().onAuthStateChanged(user => {
+      if (user) {
+        firebase
+          .database()
+          .ref('users/' + user.uid)
+          .set({
+            email: user.email,
+            lastLogin: new Date().toLocaleDateString()
+          });
+      } else {
+        let email = '';
+        let password = '';
+
+        firebase
+          .auth()
+          .signInAndRetrieveDataWithEmailAndPassword(email, password)
+          .catch(function(error) {
+            // Handle Errors here.
+            var errorCode = error.code;
+            var errorMessage = error.message;
+            if (errorCode === 'auth/wrong-password') {
+              alert('Wrong password.');
+            } else {
+              alert(errorMessage);
+            }
+            console.log(error);
+          });
+      }
+    });
+  }
   render() {
     return (
       <div className="App">
@@ -15,7 +60,7 @@ class App extends Component {
           <img src={logo} className="App-logo" alt="logo" />
         </header>
         <Title />
-        <CalendarManager />
+        <CalendarManager db={firebase} />
       </div>
     );
   }
@@ -47,11 +92,11 @@ class CalendarManager extends React.Component {
       return element.getTime() === day.getTime();
     });
 
-    this.setState({
-      dayItems: this.state.dayItems.filter(
+    this.setState(prevState => ({
+      dayItems: prevState.dayItems.filter(
         (item, itemIndex) => itemIndex !== dayIndex
       )
-    });
+    }));
   }
 
   handleConfirm() {
@@ -60,6 +105,19 @@ class CalendarManager extends React.Component {
       return;
     }
     this.setState({ daysConfirmed: !this.state.daysConfirmed });
+    //console.log(firebase.auth().currentUser);
+    console.log('update firebase');
+    let connection = firebase.database().ref('dates');
+    let dayRef = connection.push({
+      user: firebase.auth().currentUser.uid,
+      selectedDays: this.state.dayItems.toLocaleString()
+    });
+    console.log(dayRef);
+    /*connection.set( this.state.dayItems ).then( (cb) => {
+      console.log("xxxxx");
+      console.log(cb);
+    });*/
+    //firebase.database().ref('dates').push( this.state.dayItems );
   }
 
   handleClick(day, { currentSelected }) {
@@ -68,6 +126,7 @@ class CalendarManager extends React.Component {
       return;
     }
 
+    // ignore past dates
     if (day.getTime() < new Date().getTime()) {
       return;
     }
