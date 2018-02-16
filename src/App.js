@@ -68,6 +68,10 @@ class CalendarManager extends React.Component {
       return;
     }
 
+    if (day.getTime() < new Date().getTime()) {
+      return;
+    }
+
     // check if the date exists in array of day items
     let inSelected = this.state.dayItems.findIndex(element => {
       return element.getTime() === day.getTime();
@@ -100,6 +104,9 @@ class CalendarManager extends React.Component {
       calendarContainer: true,
       daysConfirmed: this.state.daysConfirmed
     });
+    let disabledDays = {
+      before: new Date()
+    };
     return (
       <div className={mainClasses}>
         Calendar
@@ -108,6 +115,7 @@ class CalendarManager extends React.Component {
           locale={'fi'}
           onDayClick={this.handleClick}
           selectedDays={this.state.dayItems}
+          disabledDays={disabledDays}
         />
         {this.state.activeDay ? (
           <p>You clicked {this.state.activeDay.toLocaleDateString()}</p>
