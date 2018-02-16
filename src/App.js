@@ -5,6 +5,7 @@ import DayPicker from 'react-day-picker';
 import 'react-day-picker/lib/style.css';
 import MomentLocaleUtils from 'react-day-picker/moment';
 import 'moment/locale/fi';
+import classSet from 'react-classset';
 
 class App extends Component {
   render() {
@@ -95,8 +96,12 @@ class CalendarManager extends React.Component {
   }
 
   render() {
+    let mainClasses = classSet({
+      calendarContainer: true,
+      daysConfirmed: this.state.daysConfirmed
+    });
     return (
-      <div className="calendarContainer">
+      <div className={mainClasses}>
         Calendar
         <DayPicker
           localeUtils={MomentLocaleUtils}
