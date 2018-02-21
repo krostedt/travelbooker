@@ -22,36 +22,6 @@ class App extends Component {
       messagingSenderId: '424597927994'
     };
     firebase.initializeApp(config);
-
-    firebase.auth().onAuthStateChanged(user => {
-      if (user) {
-        firebase
-          .database()
-          .ref('users/' + user.uid)
-          .set({
-            email: user.email,
-            lastLogin: new Date().toLocaleDateString()
-          });
-      } else {
-        let email = '';
-        let password = '';
-
-        firebase
-          .auth()
-          .signInAndRetrieveDataWithEmailAndPassword(email, password)
-          .catch(function(error) {
-            // Handle Errors here.
-            var errorCode = error.code;
-            var errorMessage = error.message;
-            if (errorCode === 'auth/wrong-password') {
-              alert('Wrong password.');
-            } else {
-              alert(errorMessage);
-            }
-            console.log(error);
-          });
-      }
-    });
   }
   render() {
     return (
@@ -75,8 +45,60 @@ class CalendarManager extends React.Component {
     this.state = {
       activeDay: undefined,
       dayItems: [],
-      daysConfirmed: false
+      daysConfirmed: false,
+      user: firebase.auth().currentUser
     };
+
+    firebase.auth().onAuthStateChanged(user => {
+      if (user) {
+        firebase
+          .database()
+          .ref('users/' + user.uid)
+          .set({
+            email: user.email,
+            lastLogin: new Date().toLocaleDateString()
+          });
+
+        this.setState({ user: user });
+
+        // get dates for user
+        let userDates = firebase
+          .database()
+          .ref('/dates/' + this.state.user.uid)
+          .once('value')
+          .then(dataSnapshot => {
+            let userData = dataSnapshot.val();
+            console.log(dataSnapshot.val());
+
+            if (userData) {
+              const { selectedDays } = userData[Object.keys(userData)[0]];
+              console.log(selectedDays);
+              //console.log( selectedDays.split(',') );
+              this.setState({
+                dayItems: selectedDays.map(day => new Date(day))
+              });
+            }
+          });
+      } else {
+        let email = '';
+        let password = '';
+
+        firebase
+          .auth()
+          .signInAndRetrieveDataWithEmailAndPassword(email, password)
+          .catch(function(error) {
+            // Handle Errors here.
+            var errorCode = error.code;
+            var errorMessage = error.message;
+            if (errorCode === 'auth/wrong-password') {
+              alert('Wrong password.');
+            } else {
+              alert(errorMessage);
+            }
+            console.log(error);
+          });
+      }
+    });
 
     this.handleClick = this.handleClick.bind(this);
     this.handleConfirm = this.handleConfirm.bind(this);
@@ -104,20 +126,21 @@ class CalendarManager extends React.Component {
       console.log('select at least one item');
       return;
     }
+
     this.setState({ daysConfirmed: !this.state.daysConfirmed });
-    //console.log(firebase.auth().currentUser);
-    console.log('update firebase');
-    let connection = firebase.database().ref('dates');
-    let dayRef = connection.push({
-      user: firebase.auth().currentUser.uid,
-      selectedDays: this.state.dayItems.toLocaleString()
-    });
-    console.log(dayRef);
-    /*connection.set( this.state.dayItems ).then( (cb) => {
-      console.log("xxxxx");
-      console.log(cb);
-    });*/
-    //firebase.database().ref('dates').push( this.state.dayItems );
+
+    if (this.state.user) {
+      let connection = firebase.database().ref('dates/' + this.state.user.uid);
+
+      let dayRef = connection.update({
+        submitDate: new Date().toLocaleDateString(),
+        selectedDays: this.state.dayItems.map(date => {
+          return date.getTime();
+        })
+      });
+
+      console.log(dayRef);
+    }
   }
 
   handleClick(day, { currentSelected }) {
@@ -176,10 +199,9 @@ class CalendarManager extends React.Component {
           selectedDays={this.state.dayItems}
           disabledDays={disabledDays}
         />
-        {this.state.activeDay ? (
+        {this.state.dayItems.length <= 0 && <p>Please select a day</p>}
+        {this.state.selectedDays && (
           <p>You clicked {this.state.activeDay.toLocaleDateString()}</p>
-        ) : (
-          <p>Please select a day</p>
         )}
         <DayList
           dayList={this.state.dayItems}
