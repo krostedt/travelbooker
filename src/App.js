@@ -71,11 +71,8 @@ class CalendarManager extends React.Component {
             console.log(dataSnapshot.val());
 
             if (userData) {
-              const { selectedDays } = userData[Object.keys(userData)[0]];
-              console.log(selectedDays);
-              //console.log( selectedDays.split(',') );
               this.setState({
-                dayItems: selectedDays.map(day => new Date(day))
+                dayItems: userData.selectedDays.map(day => new Date(day))
               });
             }
           });
