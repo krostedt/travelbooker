@@ -80,8 +80,8 @@ class CalendarManager extends React.Component {
             }
           });
       } else {
-        let email = '';
-        let password = '';
+        let email = process.env.REACT_APP_DEV_TEST_USERNAME;
+        let password = process.env.REACT_APP_DEV_TEST_PASSWORD;
 
         firebase
           .auth()
