@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import classSet from 'react-classset';
 import DayPicker from 'react-day-picker';
 import 'react-day-picker/lib/style.css';
@@ -32,7 +32,7 @@ class CalendarManager extends React.Component {
         this.setState({ user: user });
 
         // get dates for user
-        let userDates = firebase
+        firebase
           .database()
           .ref('/dates/' + this.state.user.uid)
           .once('value')
