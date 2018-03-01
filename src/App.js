@@ -4,6 +4,7 @@ import './App.css';
 import firebase from 'firebase';
 import CalendarManager from './CalendarManager';
 import { Route, Redirect, BrowserRouter as Router } from 'react-router-dom';
+import ROUTES from './routes';
 
 const auth = {
   isAuthenticated: false,
@@ -18,7 +19,7 @@ const auth = {
   }
 };
 
-class Login extends Component {
+class Login extends React.Component {
   constructor(props) {
     super();
     this.state = {
@@ -38,7 +39,7 @@ class Login extends Component {
       return (
         <Redirect
           to={{
-            pathname: '/calendar',
+            pathname: ROUTES.calendar,
             state: { isAuthenticated: this.state.isAuthenticated }
           }}
         />
@@ -58,7 +59,7 @@ const Calendar = () =>
   !auth.isAuthenticated ? (
     <Redirect
       to={{
-        pathname: '/',
+        pathname: ROUTES.root,
         state: { isAuthenticated: auth.isAuthenticated }
       }}
     />
@@ -75,7 +76,7 @@ class App extends Component {
     super(props);
     // Initialize Firebase
 
-    let config = {
+    const config = {
       apiKey: 'AIzaSyBul-6awofxDhfB_-xzojnLnaDv7dKFf7k',
       authDomain: 'travelbkr.firebaseapp.com',
       databaseURL: 'https://travelbkr.firebaseio.com',
@@ -92,8 +93,8 @@ class App extends Component {
           <img src={logo} className="App-logo" alt="logo" />
         </header>
         <Title />
-        <Route exact path="/" component={Login} />
-        <Route path="/calendar" render={Calendar} />
+        <Route exact path={ROUTES.root} component={Login} />
+        <Route path={ROUTES.calendar} render={Calendar} />
       </div>
     );
   }
