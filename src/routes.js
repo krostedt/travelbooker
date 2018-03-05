@@ -2,7 +2,7 @@
 //export const CALENDAR = '/calendar';
 const ROUTES = {
   login: '/login',
-  calendar: 'calendar',
+  calendar: '/calendar',
   root: '/'
 };
 
