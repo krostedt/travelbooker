@@ -4,7 +4,7 @@ import DayPicker from 'react-day-picker';
 import 'react-day-picker/lib/style.css';
 import MomentLocaleUtils from 'react-day-picker/moment';
 import 'moment/locale/fi';
-import firebase from 'firebase';
+import { auth, firebase } from './firebase-main';
 
 /**
  * Base component for managing the app
@@ -12,6 +12,7 @@ import firebase from 'firebase';
 class CalendarManager extends React.Component {
   constructor(props) {
     super(props);
+
     this.state = {
       activeDay: undefined,
       dayItems: [],
@@ -20,36 +21,34 @@ class CalendarManager extends React.Component {
     };
 
     firebase.auth().onAuthStateChanged(user => {
+      console.log('auth state changed 2');
       if (user) {
-        firebase
-          .database()
-          .ref('users/' + user.uid)
-          .set({
-            email: user.email,
-            lastLogin: new Date().toLocaleDateString()
-          });
-
-        this.setState({ user: user });
-
-        // get dates for user
-        firebase
-          .database()
-          .ref('/dates/' + this.state.user.uid)
-          .once('value')
-          .then(dataSnapshot => {
-            let userData = dataSnapshot.val();
-            console.log(dataSnapshot.val());
-
-            if (userData) {
-              this.setState({
-                dayItems: userData.selectedDays.map(day => new Date(day))
-              });
-            }
-          });
+        this.setUserData(user);
       } else {
         let email = process.env.REACT_APP_DEV_TEST_USERNAME;
         let password = process.env.REACT_APP_DEV_TEST_PASSWORD;
 
+        auth
+          .signInWithEmailAndPassword(email, password)
+          .then(() => {
+            console.log('done');
+            //this.setState(() => ({ ...INITIAL_STATE }));
+            //history.push(routes.HOME);
+          })
+          .catch(error => {
+            // Handle Errors here.
+            //this.setState(byPropKey('error', error));
+            var errorCode = error.code;
+            var errorMessage = error.message;
+            if (errorCode === 'auth/wrong-password') {
+              alert('Wrong password.');
+            } else {
+              alert(errorMessage);
+            }
+            console.log(error);
+          });
+
+        /*
         firebase
           .auth()
           .signInAndRetrieveDataWithEmailAndPassword(email, password)
@@ -63,13 +62,43 @@ class CalendarManager extends React.Component {
               alert(errorMessage);
             }
             console.log(error);
-          });
+          });*/
       }
     });
 
     this.handleClick = this.handleClick.bind(this);
     this.handleConfirm = this.handleConfirm.bind(this);
     this.handleRemove = this.handleRemove.bind(this);
+    this.setUserData = this.setUserData.bind(this);
+  }
+
+  setUserData(user) {
+    // set user last login
+    firebase
+      .database()
+      .ref('users/' + user.uid)
+      .set({
+        email: user.email,
+        lastLogin: new Date().toLocaleDateString()
+      });
+
+    this.setState({ user: user });
+
+    // get dates for user
+    firebase
+      .database()
+      .ref('/dates/' + this.state.user.uid)
+      .once('value')
+      .then(dataSnapshot => {
+        let userData = dataSnapshot.val();
+        console.log(dataSnapshot.val());
+
+        if (userData) {
+          this.setState({
+            dayItems: userData.selectedDays.map(day => new Date(day))
+          });
+        }
+      });
   }
 
   handleRemove(event, day) {
