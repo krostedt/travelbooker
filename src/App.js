@@ -1,60 +1,63 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
-import firebase from 'firebase';
 import CalendarManager from './CalendarManager';
 import { Route, Redirect, BrowserRouter as Router } from 'react-router-dom';
 import ROUTES from './routes';
+import { auth, firebase, uiConfig, StyledFirebaseAuth } from './firebase-main';
 
-const auth = {
-  isAuthenticated: false,
-  login(cb) {
-    this.isAuthenticated = true;
-    //console.log("login");
-    cb();
-  },
-  logout(cb) {
-    this.isAuthenticated = false;
-    cb();
-  }
-};
-
-class Login extends React.Component {
+class LoginPage extends React.Component {
   constructor(props) {
-    super();
-    this.state = {
-      redirectToCalendar: false,
-      isAuthenticated: false
-    };
+    super(props);
+    this.state = { signedIn: false };
   }
 
-  handleLogin = () => {
-    auth.login(() => {
-      this.setState({ redirectToCalendar: true });
+  componentWillMount() {
+    auth.onAuthStateChanged(user => {
+      return this.setState({ signedIn: user !== 0 });
     });
-  };
+  }
 
   render() {
-    if (this.state.redirectToCalendar) {
-      return (
-        <Redirect
-          to={{
-            pathname: ROUTES.calendar,
-            state: { isAuthenticated: this.state.isAuthenticated }
-          }}
-        />
-      );
+    console.log('current state is :');
+    console.log(this.state.signedIn);
+    if (this.state.signedIn) {
+      return <Redirect to={ROUTES.calendar} />;
     }
 
     return (
       <div>
         <h2>Login</h2>
-        <button onClick={this.handleLogin}>Login</button>
+        <StyledFirebaseAuth uiConfig={uiConfig} firebaseAuth={auth} />
       </div>
     );
   }
 }
 
+class LogoutButton extends React.Component {
+  handleLogout() {
+    auth
+      .signOut()
+      .then(function() {
+        // success
+        console.log('logout success');
+      })
+      .catch(function(error) {
+        // error
+        console.log(error);
+      });
+  }
+
+  render() {
+    return (
+      <button type="button" onClick={this.handleLogout}>
+        Logout
+      </button>
+    );
+  }
+}
+
+/*
 const Calendar = () =>
   !auth.isAuthenticated ? (
     <Redirect
@@ -66,26 +69,22 @@ const Calendar = () =>
   ) : (
     <CalendarManager db={firebase} />
   );
+*/
+
+const Calendar = () => {
+  return (
+    <div>
+      <CalendarManager db={firebase} />
+      <LogoutButton />
+    </div>
+  );
+};
 
 const Title = () => {
   return <h1>Travelbooker</h1>;
 };
 
 class App extends Component {
-  constructor(props) {
-    super(props);
-    // Initialize Firebase
-
-    const config = {
-      apiKey: 'AIzaSyBul-6awofxDhfB_-xzojnLnaDv7dKFf7k',
-      authDomain: 'travelbkr.firebaseapp.com',
-      databaseURL: 'https://travelbkr.firebaseio.com',
-      projectId: 'travelbkr',
-      storageBucket: '',
-      messagingSenderId: '424597927994'
-    };
-    firebase.initializeApp(config);
-  }
   render() {
     return (
       <div className="App">
@@ -93,8 +92,8 @@ class App extends Component {
           <img src={logo} className="App-logo" alt="logo" />
         </header>
         <Title />
-        <Route exact path={ROUTES.root} component={Login} />
-        <Route path={ROUTES.calendar} render={Calendar} />
+        <Route exact path={ROUTES.root} component={LoginPage} />
+        <Route path={ROUTES.calendar} component={Calendar} />
       </div>
     );
   }
