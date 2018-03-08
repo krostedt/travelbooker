@@ -21,48 +21,11 @@ class CalendarManager extends React.Component {
     };
 
     firebase.auth().onAuthStateChanged(user => {
-      console.log('auth state changed 2');
+      console.log('auth state changed');
       if (user) {
         this.setUserData(user);
       } else {
-        let email = process.env.REACT_APP_DEV_TEST_USERNAME;
-        let password = process.env.REACT_APP_DEV_TEST_PASSWORD;
-
-        auth
-          .signInWithEmailAndPassword(email, password)
-          .then(() => {
-            console.log('done');
-            //this.setState(() => ({ ...INITIAL_STATE }));
-            //history.push(routes.HOME);
-          })
-          .catch(error => {
-            // Handle Errors here.
-            //this.setState(byPropKey('error', error));
-            var errorCode = error.code;
-            var errorMessage = error.message;
-            if (errorCode === 'auth/wrong-password') {
-              alert('Wrong password.');
-            } else {
-              alert(errorMessage);
-            }
-            console.log(error);
-          });
-
-        /*
-        firebase
-          .auth()
-          .signInAndRetrieveDataWithEmailAndPassword(email, password)
-          .catch(function(error) {
-            // Handle Errors here.
-            var errorCode = error.code;
-            var errorMessage = error.message;
-            if (errorCode === 'auth/wrong-password') {
-              alert('Wrong password.');
-            } else {
-              alert(errorMessage);
-            }
-            console.log(error);
-          });*/
+        console.log('no user');
       }
     });
 
@@ -70,9 +33,37 @@ class CalendarManager extends React.Component {
     this.handleConfirm = this.handleConfirm.bind(this);
     this.handleRemove = this.handleRemove.bind(this);
     this.setUserData = this.setUserData.bind(this);
+    this.loginUser = this.loginUser.bind(this);
+  }
+
+  loginUser() {
+    let email = process.env.REACT_APP_DEV_TEST_USERNAME;
+    let password = process.env.REACT_APP_DEV_TEST_PASSWORD;
+
+    auth
+      .signInWithEmailAndPassword(email, password)
+      .then(() => {
+        console.log('done');
+        //this.setState(() => ({ ...INITIAL_STATE }));
+        //history.push(routes.HOME);
+      })
+      .catch(error => {
+        // Handle Errors here.
+        //this.setState(byPropKey('error', error));
+        var errorCode = error.code;
+        var errorMessage = error.message;
+        if (errorCode === 'auth/wrong-password') {
+          alert('Wrong password.');
+        } else {
+          alert(errorMessage);
+        }
+        console.log(error);
+      });
   }
 
   setUserData(user) {
+    console.log(auth.currentUser.email);
+
     // set user last login
     firebase
       .database()
@@ -82,7 +73,10 @@ class CalendarManager extends React.Component {
         lastLogin: new Date().toLocaleDateString()
       });
 
-    this.setState({ user: user });
+    this.setState({
+      user: user,
+      signedIn: user !== 0
+    });
 
     // get dates for user
     firebase
@@ -139,14 +133,10 @@ class CalendarManager extends React.Component {
     }
   }
 
+  // handle calendar click
   handleClick(day, { currentSelected }) {
-    // if days are confirmed, do not process additional clicks
-    if (this.state.daysConfirmed) {
-      return;
-    }
-
-    // ignore past dates
-    if (day.getTime() < new Date().getTime()) {
+    // if day is not valid or input not allowed, exit
+    if (this.state.daysConfirmed || day.getTime() < new Date().getTime()) {
       return;
     }
 
@@ -187,7 +177,8 @@ class CalendarManager extends React.Component {
     };
     return (
       <div className={mainClasses}>
-        Calendar
+        <p>Hello {auth.currentUser && auth.currentUser.email}</p>
+        <h3>Calendar</h3>
         <DayPicker
           localeUtils={MomentLocaleUtils}
           locale={'fi'}
@@ -231,7 +222,10 @@ function DayList(props) {
   return (
     <div className="DayItems">
       {dayItems.length ? (
-        <p> {props.confirmed ? 'Confirmed' : 'Selected'} days</p>
+        <h4 className="dayListTitle">
+          {' '}
+          {props.confirmed ? 'Confirmed' : 'Selected'} days
+        </h4>
       ) : (
         ''
       )}

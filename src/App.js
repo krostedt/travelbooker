@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import CalendarManager from './CalendarManager';
-import { Route, Redirect, BrowserRouter as Router } from 'react-router-dom';
+import { Route, Redirect } from 'react-router-dom';
 import ROUTES from './routes';
 import { auth, firebase, uiConfig, StyledFirebaseAuth } from './firebase-main';
 
@@ -12,23 +12,28 @@ class LoginPage extends React.Component {
     this.state = { signedIn: false };
   }
 
-  componentWillMount() {
+  // Listen to the Firebase Auth state and set the local state.
+  componentDidMount() {
     auth.onAuthStateChanged(user => {
-      return this.setState({ signedIn: user !== 0 });
+      if (user && user !== 0) {
+        this.props.signIn();
+      }
     });
   }
 
   render() {
-    console.log('current state is :');
-    console.log(this.state.signedIn);
-    if (this.state.signedIn) {
-      return <Redirect to={ROUTES.calendar} />;
+    if (!this.state.signedIn) {
+      return (
+        <div>
+          <p>Please sign-in:</p>
+          <StyledFirebaseAuth uiConfig={uiConfig} firebaseAuth={auth} />
+        </div>
+      );
     }
-
     return (
       <div>
-        <h2>Login</h2>
-        <StyledFirebaseAuth uiConfig={uiConfig} firebaseAuth={auth} />
+        <p>Welcome ! You are now signed-in!</p>
+        <LogoutButton />
       </div>
     );
   }
@@ -41,6 +46,7 @@ class LogoutButton extends React.Component {
       .then(function() {
         // success
         console.log('logout success');
+        return <Redirect to={ROUTES.login} />;
       })
       .catch(function(error) {
         // error
@@ -74,17 +80,33 @@ const Calendar = () =>
 const Calendar = () => {
   return (
     <div>
-      <CalendarManager db={firebase} />
       <LogoutButton />
+      <CalendarManager db={firebase} />
     </div>
   );
 };
 
 const Title = () => {
-  return <h1>Travelbooker</h1>;
+  return (
+    <div>
+      <h1>Travelbooker</h1>
+    </div>
+  );
 };
 
 class App extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = { signedIn: false };
+    this.handleLogin = this.handleLogin.bind(this);
+  }
+
+  handleLogin() {
+    console.log('logging user in');
+    this.setState({ signedIn: true });
+  }
+
   render() {
     return (
       <div className="App">
@@ -93,7 +115,22 @@ class App extends Component {
         </header>
         <Title />
         <Route exact path={ROUTES.root} component={LoginPage} />
-        <Route path={ROUTES.calendar} component={Calendar} />
+        <Route
+          path={ROUTES.login}
+          render={() =>
+            !this.state.signedIn ? (
+              <LoginPage signIn={this.handleLogin} />
+            ) : (
+              <Redirect to={ROUTES.calendar} />
+            )
+          }
+        />
+        <Route
+          path={ROUTES.calendar}
+          render={() =>
+            !this.state.signedIn ? <Redirect to={ROUTES.login} /> : <Calendar />
+          }
+        />
       </div>
     );
   }
