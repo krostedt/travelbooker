@@ -33,7 +33,6 @@ class CalendarManager extends React.Component {
     this.handleConfirm = this.handleConfirm.bind(this);
     this.handleRemove = this.handleRemove.bind(this);
     this.setUserData = this.setUserData.bind(this);
-    this.loginUser = this.loginUser.bind(this);
     this.authUser = this.authUser.bind(this);
   }
 
@@ -49,31 +48,6 @@ class CalendarManager extends React.Component {
         }
       });
     });
-  }
-
-  loginUser() {
-    let email = process.env.REACT_APP_DEV_TEST_USERNAME;
-    let password = process.env.REACT_APP_DEV_TEST_PASSWORD;
-
-    auth
-      .signInWithEmailAndPassword(email, password)
-      .then(() => {
-        console.log('done');
-        //this.setState(() => ({ ...INITIAL_STATE }));
-        //history.push(routes.HOME);
-      })
-      .catch(error => {
-        // Handle Errors here.
-        //this.setState(byPropKey('error', error));
-        var errorCode = error.code;
-        var errorMessage = error.message;
-        if (errorCode === 'auth/wrong-password') {
-          alert('Wrong password.');
-        } else {
-          alert(errorMessage);
-        }
-        console.log(error);
-      });
   }
 
   setUserData(user) {
