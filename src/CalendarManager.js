@@ -20,20 +20,35 @@ class CalendarManager extends React.Component {
       user: firebase.auth().currentUser
     };
 
-    firebase.auth().onAuthStateChanged(user => {
-      console.log('auth state changed');
-      if (user) {
+    this.authUser().then(
+      user => {
         this.setUserData(user);
-      } else {
-        console.log('no user');
+      },
+      error => {
+        console.log('fail');
       }
-    });
+    );
 
     this.handleClick = this.handleClick.bind(this);
     this.handleConfirm = this.handleConfirm.bind(this);
     this.handleRemove = this.handleRemove.bind(this);
     this.setUserData = this.setUserData.bind(this);
     this.loginUser = this.loginUser.bind(this);
+    this.authUser = this.authUser.bind(this);
+  }
+
+  authUser() {
+    return new Promise(function(resolve, reject) {
+      firebase.auth().onAuthStateChanged(user => {
+        console.log('auth state changed');
+        if (user) {
+          resolve(user);
+        } else {
+          reject('user not logged in');
+          console.log('no user');
+        }
+      });
+    });
   }
 
   loginUser() {
@@ -62,6 +77,7 @@ class CalendarManager extends React.Component {
   }
 
   setUserData(user) {
+    console.log('current user:');
     console.log(auth.currentUser.email);
 
     // set user last login
