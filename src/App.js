@@ -40,23 +40,10 @@ class LoginPage extends React.Component {
 }
 
 class LogoutButton extends React.Component {
-  handleLogout() {
-    auth
-      .signOut()
-      .then(function() {
-        // success
-        console.log('logout success');
-        return <Redirect to={ROUTES.login} />;
-      })
-      .catch(function(error) {
-        // error
-        console.log(error);
-      });
-  }
-
   render() {
+    console.log(this.props);
     return (
-      <button type="button" onClick={this.handleLogout}>
+      <button type="button" onClick={this.props.handleLogout}>
         Logout
       </button>
     );
@@ -77,10 +64,10 @@ const Calendar = () =>
   );
 */
 
-const Calendar = () => {
+const Calendar = props => {
   return (
     <div>
-      <LogoutButton />
+      <LogoutButton handleLogout={props.signOut} />
       <CalendarManager db={firebase} />
     </div>
   );
@@ -100,11 +87,31 @@ class App extends Component {
 
     this.state = { signedIn: false };
     this.handleLogin = this.handleLogin.bind(this);
+    this.handleLogout = this.handleLogout.bind(this);
   }
 
   handleLogin() {
     console.log('logging user in');
     this.setState({ signedIn: true });
+  }
+
+  handleLogout() {
+    console.log('logging user out');
+
+    const app = this;
+
+    auth
+      .signOut()
+      .then(function() {
+        // success
+
+        app.setState({ signedIn: false });
+        console.log('logout success');
+      })
+      .catch(function(error) {
+        // error
+        console.log(error);
+      });
   }
 
   render() {
@@ -128,7 +135,11 @@ class App extends Component {
         <Route
           path={ROUTES.calendar}
           render={() =>
-            !this.state.signedIn ? <Redirect to={ROUTES.login} /> : <Calendar />
+            !this.state.signedIn ? (
+              <Redirect to={ROUTES.login} />
+            ) : (
+              <Calendar signOut={this.handleLogout} />
+            )
           }
         />
       </div>
