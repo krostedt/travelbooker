@@ -63,10 +63,7 @@ class CalendarManager extends React.Component {
         lastLogin: new Date().toLocaleDateString()
       });
 
-    this.setState({
-      user: user,
-      signedIn: user !== 0
-    });
+    this.setState({ user: user });
 
     // get dates for user
     firebase
@@ -188,6 +185,7 @@ class CalendarManager extends React.Component {
         <ConfirmButton
           onConfirm={this.handleConfirm}
           confirmed={this.state.daysConfirmed}
+          disabled={this.state.dayItems.length === 0}
         />
       </div>
     );
@@ -246,7 +244,7 @@ const DayItem = props => {
 
 const ConfirmButton = props => {
   return (
-    <button type="button" onClick={props.onConfirm}>
+    <button type="button" onClick={props.onConfirm} disabled={props.disabled}>
       {props.confirmed ? 'Confirmed' : 'Confirm'}
     </button>
   );
