@@ -1,6 +1,6 @@
 import firebase from 'firebase';
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
-import firebaseui from 'firebaseui';
+import * as firebaseui from 'firebaseui';
 
 /*const auth = {
     isAuthenticated: false,

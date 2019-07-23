@@ -1,35 +1,51 @@
 {
   "name": "travelbooker",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "dependencies": {
-    "firebase": "^4.10.1",
-    "firebaseui": "^2.6.2",
-    "husky": "^0.14.3",
-    "lint-staged": "^6.1.0",
+    "firebase": "^6.3.1",
+    "firebaseui": "^4.1.0",
+    "husky": "^3.0.1",
+    "lint-staged": "^9.2.0",
     "moment": "^2.20.1",
     "prettier": "^1.10.2",
     "react": "^16.2.0",
-    "react-big-calendar": "^0.18.0",
+    "react-big-calendar": "^0.22.0",
     "react-calendar": "^2.13.0",
     "react-classset": "^0.0.2",
     "react-day-picker": "^7.0.7",
     "react-dom": "^16.2.0",
-    "react-firebaseui": "^1.1.9",
-    "react-router-dom": "^4.2.2",
-    "react-scripts": "1.1.1"
+    "react-firebaseui": "^3.1.2",
+    "react-router-dom": "^5.0.1",
+    "react-scripts": "^3.0.1"
   },
   "scripts": {
     "precommit": "lint-staged",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "upgrade-interactive": "npm-check --update"
   },
   "lint-staged": {
     "src/**/*.{js,jsx,json,css}": [
       "prettier --single-quote --write",
       "git add"
+    ]
+  },
+  "devDependencies": {
+    "npm-check": "^5.9.0"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
     ]
   }
 }
